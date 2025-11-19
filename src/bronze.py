@@ -21,9 +21,11 @@ def create_bucket():
 
     # Create the bucket/folders on AWS S3
     try:
-        s3_bucket = s3.create_bucket(Bucket=bucket, CreateBucketConfiguration={'LocationConstraint': region})
+        response = s3.head_bucket(Bucket=bucket)
+        if response['ResponseMetadata']['HTTPStatusCode'] == 200:
+            s3_bucket = bucket
     except:
-        pass
+        s3_bucket = s3.create_bucket(Bucket=bucket, CreateBucketConfiguration={'LocationConstraint': region})
     
     return s3_bucket
 
@@ -38,8 +40,15 @@ def create_bronze():
 
     # Read all tables from database ---> Convert all tables to parquet ---> Send parquet files to S3 
     for table in db_tables:
-        db_tables = pd.read_sql_table(con=conn, table_name=table)
-        parquet_files = db_tables.to_parquet(path=f's3://{bucket}/{table}/{date_time}/{table}.parquet', engine='pyarrow')
+        try:
+            db_tables = pd.read_sql_table(con=conn, table_name=table)
+            parquet_files = db_tables.to_parquet(path=f's3://{bucket}/{table}/{date_time}/{table}.parquet', engine='pyarrow')
+            
+            print(f'{table}.parquet file successfully loaded into s3')
+
+        except:
+            print(f'{table}.parquet file was not successfully loaded into S3')
 
     return parquet_files
+
 
