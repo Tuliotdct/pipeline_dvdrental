@@ -1,4 +1,4 @@
-from aws_secrets import get_secret
+from .aws_secrets import get_secret
 from sqlalchemy import create_engine
 from sqlalchemy.engine import URL
 

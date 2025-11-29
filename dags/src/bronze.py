@@ -1,5 +1,5 @@
 import pandas as pd
-from db_connections import get_connection
+from .db_connections import get_connection
 from sqlalchemy import inspect
 import pendulum 
 import boto3
@@ -7,14 +7,10 @@ import os
 from dotenv import load_dotenv
 import pyarrow
 
-
 load_dotenv()
-conn = get_connection()
-bucket = os.getenv('BUCKET_NAME')
-region = os.getenv('REGION_NAME')
 date_time = pendulum.now().format('YYYY-MM-DD_HH-mm-ss')
 
-def create_bucket():
+def create_bucket(bucket, region):
 
     # Create s3 connection
     s3 = boto3.client('s3')
@@ -29,15 +25,26 @@ def create_bucket():
     
     return s3_bucket
 
-def create_bronze():
-    
-    # Call create_bucket function
-    create_bucket()
+def get_db_tables(conn):
     
     # Inspect all the tables in the database
     insp = inspect(conn)
     db_tables = insp.get_table_names()
 
+    return db_tables
+
+def create_bronze():
+
+    conn = get_connection()
+    bucket = os.getenv('BUCKET_NAME')
+    region = os.getenv('REGION_NAME')
+    
+    # Call create_bucket function
+    create_bucket(bucket, region)
+
+    # Call get_db_tables function
+    db_tables = get_db_tables(conn)
+    
     # Read all tables from database ---> Convert all tables to parquet ---> Send parquet files to S3 
     for table in db_tables:
         try:
@@ -50,5 +57,4 @@ def create_bronze():
             print(f'{table}.parquet file was not successfully loaded into S3')
 
     return parquet_files
-
 
