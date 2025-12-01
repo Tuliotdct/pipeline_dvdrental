@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 import pyarrow
 
 load_dotenv()
-date_time = pendulum.now().format('YYYY-MM-DD_HH-mm-ss')
 
 def create_bucket(bucket, region):
 
@@ -33,28 +32,39 @@ def get_db_tables(conn):
 
     return db_tables
 
-def create_bronze():
+def create_bronze_for_table(table):
 
+    # Get one unique table from the database at once
     conn = get_connection()
     bucket = os.getenv('BUCKET_NAME')
     region = os.getenv('REGION_NAME')
-    
+
+    # time folder
+    date_time = pendulum.now().format('YYYY-MM-DD_HH-mm-ss')
+
     # Call create_bucket function
     create_bucket(bucket, region)
-
-    # Call get_db_tables function
-    db_tables = get_db_tables(conn)
     
-    # Read all tables from database ---> Convert all tables to parquet ---> Send parquet files to S3 
-    for table in db_tables:
-        try:
-            db_tables = pd.read_sql_table(con=conn, table_name=table)
-            parquet_files = db_tables.to_parquet(path=f's3://{bucket}/{table}/{date_time}/{table}.parquet', engine='pyarrow')
-            
-            print(f'{table}.parquet file successfully loaded into s3')
+    # Read table from database ---> Convert all table to parquet ---> Send parquet files to S3 
+    try:
+        df = pd.read_sql_table(con=conn, table_name=table)
+        df.to_parquet(path=f's3://{bucket}/{table}/{date_time}/{table}.parquet', engine='pyarrow')
 
-        except:
-            print(f'{table}.parquet file was not successfully loaded into S3')
+        print(f'{table}.parquet file successfully loaded into s3')
 
-    return parquet_files
+        return True
+
+    except:
+        print(f'{table}.parquet file was not successfully loaded into S3')
+
+    return False
+
+
+def create_bronze():
+
+    # Get all the tables from the database at once.
+    conn = get_connection()
+    tables = get_db_tables(conn)
+    for table in tables:
+        create_bronze_for_table(table)
 
