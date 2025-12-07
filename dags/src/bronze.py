@@ -48,7 +48,7 @@ def create_bronze_for_table(table):
     # Read table from database ---> Convert all table to parquet ---> Send parquet files to S3 
     try:
         df = pd.read_sql_table(con=conn, table_name=table)
-        df.to_parquet(path=f's3://{bucket}/{table}/{date_time}/{table}.parquet', engine='pyarrow')
+        df.to_parquet(path=f's3://{bucket}/bronze/{table}/{date_time}/{table}.parquet', engine='pyarrow')
 
         print(f'{table}.parquet file successfully loaded into s3')
 
