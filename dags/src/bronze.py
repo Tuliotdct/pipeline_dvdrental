@@ -62,7 +62,7 @@ def create_bronze_for_table(table):
 
 def create_bronze():
 
-    # Get all the tables from the database at once.
+    # Get all the tables from the database at once
     conn = get_connection()
     tables = get_db_tables(conn)
     for table in tables:
