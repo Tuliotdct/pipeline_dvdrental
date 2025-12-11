@@ -1,5 +1,4 @@
-from airflow.sdk import dag, task
-from airflow.sdk import TaskGroup
+from airflow.sdk import dag, task, TaskGroup
 from airflow.providers.standard.operators.empty import EmptyOperator
 from src.bronze import create_bronze_for_table, get_db_tables, create_bucket
 from src.db_connections import get_connection
@@ -43,7 +42,7 @@ def dag_pipeline_bronze():
             
     end = EmptyOperator(task_id = 'End')
 
-    start >> task_create_bucket >>bronze_group >> end
+    start >> task_create_bucket >> bronze_group >> end
 
 dag_pipeline_bronze()
 
