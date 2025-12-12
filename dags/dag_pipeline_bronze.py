@@ -35,10 +35,10 @@ def dag_pipeline_bronze():
         
         for table in tables:
             @task(task_id = f'{table}')
-            def load_single_table(table_name=table):
+            def load_single_table_bronze(table_name=table):
                 return create_bronze_for_table(table_name)
             
-            load_single_table()
+            load_single_table_bronze()
             
     end = EmptyOperator(task_id = 'End')
 
