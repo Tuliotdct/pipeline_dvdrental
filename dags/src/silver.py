@@ -16,6 +16,9 @@ def bronze_tables():
 
     response = s3.list_objects_v2(Bucket = bucket)
 
+    if 'Contents' not in response:
+        return []
+
     list_bronze_tables = []
     for obj in response['Contents']:
         filter_bronze_tables = obj['Key'].split("/")[1]
