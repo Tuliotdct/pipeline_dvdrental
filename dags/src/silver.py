@@ -23,7 +23,7 @@ def bronze_tables():
 
     return list_bronze_tables
 
-def create_silver_for_table(table, partition_date):
+def create_silver_for_table(table, partition_date = None):
 
     # Transform data from the bronze layer and send to the Silver Layer
 

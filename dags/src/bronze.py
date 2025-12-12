@@ -32,7 +32,7 @@ def get_db_tables(conn):
 
     return db_tables
 
-def create_bronze_for_table(table, partition_date):
+def create_bronze_for_table(table, partition_date = None):
 
     # Get one unique table from the database at once
     conn = get_connection()
