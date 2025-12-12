@@ -14,7 +14,7 @@ def bronze_tables():
 
     bucket = os.getenv("BUCKET_NAME")
 
-    response = s3.list_objects_v2(Bucket = bucket)
+    response = s3.list_objects_v2(Bucket = bucket, Prefix = 'bronze/')
 
     if 'Contents' not in response:
         return []
