@@ -20,8 +20,9 @@ def dag_pipeline_silver():
     with TaskGroup(group_id = 'silver_jobs') as silver_group:
         for table in tables:
             @task(task_id=f'{table}')
-            def load_single_table_silver(table_name = table):
-                return create_silver_for_table(table=table_name)
+            def load_single_table_silver(table_name = table, logical_date = None):
+                partition_date = logical_date.format('YYYY-MM-DD_HH-mm-ss')
+                return create_silver_for_table(table=table_name, partition_date=partition_date)
             
             load_single_table_silver()
 

@@ -32,7 +32,7 @@ def get_db_tables(conn):
 
     return db_tables
 
-def create_bronze_for_table(table):
+def create_bronze_for_table(table, partition_date):
 
     # Get one unique table from the database at once
     conn = get_connection()
@@ -40,7 +40,8 @@ def create_bronze_for_table(table):
     region = os.getenv('REGION_NAME')
 
     # time folder
-    date_time = pendulum.now().format('YYYY-MM-DD_HH-mm-ss')
+    if partition_date is None:
+        partition_date = pendulum.now().format('YYYY-MM-DD_HH-mm-ss')
 
     # Call create_bucket function
     create_bucket(bucket, region)
@@ -48,7 +49,7 @@ def create_bronze_for_table(table):
     # Read table from database ---> Convert all table to parquet ---> Send parquet files to S3 
     try:
         df = pd.read_sql_table(con=conn, table_name=table)
-        df.to_parquet(path=f's3://{bucket}/bronze/{table}/{date_time}/{table}.parquet', engine='pyarrow')
+        df.to_parquet(path=f's3://{bucket}/bronze/{table}/{partition_date}/{table}.parquet', engine='pyarrow')
 
         print(f'{table}.parquet file successfully loaded into s3')
 
@@ -60,11 +61,10 @@ def create_bronze_for_table(table):
     return False
 
 
-def create_bronze():
+def create_bronze(partition_date=None):
 
     # Get all the tables from the database at once
     conn = get_connection()
     tables = get_db_tables(conn)
     for table in tables:
-        create_bronze_for_table(table)
-
+        create_bronze_for_table(table, partition_date)
