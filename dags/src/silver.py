@@ -47,8 +47,8 @@ def create_silver_for_table(table, partition_date = None):
     try:
         duckdb.sql(f"""
                    create or replace temp table tbl as
-                   select distinct * from read_parquet('s3://{bucket}/bronze/{table}/*/*.parquet')""")
-        
+                   select distinct * from read_parquet('s3://{bucket}/bronze/{table}/{partition_date}/*.parquet')""")
+
         duckdb.sql(f"""
                     COPY tbl TO 's3://{bucket}/silver/{table}/{partition_date}/{table}.parquet';
                     """)
