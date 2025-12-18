@@ -41,10 +41,8 @@ def create_bronze_for_table(table, partition_date = None):
 
     # time folder
     if partition_date is None:
-        partition_date = pendulum.now().format('YYYY-MM-DD_HH-mm-ss')
-
-    # Call create_bucket function
-    create_bucket(bucket, region)
+        # This will be triggered only for testing purposes
+        partition_date = pendulum.datetime(2025, 11, 30, 0, 0, 0).format('YYYY-MM-DD_HH-mm-ss')
     
     # Read table from database ---> Convert all table to parquet ---> Send parquet files to S3 
     try:

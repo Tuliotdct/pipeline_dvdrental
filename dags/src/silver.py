@@ -34,7 +34,9 @@ def create_silver_for_table(table, partition_date = None):
     region = os.getenv("REGION_NAME")
 
     if partition_date is None:
-        partition_date = pendulum.now().format("YYYY-MM-DD_HH-mm-ss")
+
+        # This will be triggered only for testing purposes
+        partition_date = pendulum.datetime(2025, 11, 30, 0, 0, 0).format('YYYY-MM-DD_HH-mm-ss')
 
     duckdb.sql(f"""CREATE OR REPLACE SECRET secret (
         TYPE s3,
