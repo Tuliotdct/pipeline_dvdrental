@@ -14,14 +14,14 @@ def bronze_tables():
 
     bucket = os.getenv("BUCKET_NAME")
 
-    response = s3.list_objects_v2(Bucket = bucket, Prefix = 'bronze/')
+    response = s3.list_objects_v2(Bucket = bucket, Prefix = 'bronze/', Delimiter='/')
 
-    if 'Contents' not in response:
+    if 'CommonPrefixes' not in response:
         return []
 
     list_bronze_tables = []
-    for obj in response['Contents']:
-        filter_bronze_tables = obj['Key'].split("/")[1]
+    for obj in response['CommonPrefixes']:
+        filter_bronze_tables = obj['Prefix'].split("/")[1]
         list_bronze_tables.append(filter_bronze_tables)
 
     return list_bronze_tables
@@ -70,6 +70,3 @@ def create_silver(partition_date=None):
     tables = bronze_tables()
     for table in tables:
         create_silver_for_table(table=table, partition_date=None)
-
-
-

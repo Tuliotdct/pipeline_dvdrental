@@ -31,14 +31,14 @@ def dag_pipeline_bronze():
     tables = get_db_tables(conn)
 
     with TaskGroup(group_id = 'bronze_jobs') as bronze_group:
+        @task
+        def load_single_table_bronze(table_name, logical_date=None):
+            partition_date = logical_date.in_timezone('Europe/Amsterdam').format('YYYY-MM-DD_HH-mm-ss')
+            return create_bronze_for_table(table_name, partition_date=partition_date)
         
         for table in tables:
-            @task(task_id = f'{table}')
-            def load_single_table_bronze(table_name=table, logical_date=None):
-                partition_date = logical_date.in_timezone('Europe/Amsterdam').format('YYYY-MM-DD_HH-mm-ss')
-                return create_bronze_for_table(table_name, partition_date=partition_date)
-            
-            load_single_table_bronze()
+            load_single_table_bronze.override(task_id=f'{table}')(table_name=table)
+        
             
     end = EmptyOperator(task_id = 'End')
 

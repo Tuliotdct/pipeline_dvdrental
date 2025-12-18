@@ -37,7 +37,7 @@ def dag_pipeline_main():
         failed_states=['failed']
     )
 
-    end = EmptyOperator(task_id = 'Ends')
+    end = EmptyOperator(task_id = 'End')
 
     start >> trigger_bronze >> trigger_silver >> end
 
