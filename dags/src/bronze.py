@@ -6,8 +6,12 @@ import boto3
 import os
 from dotenv import load_dotenv
 import pyarrow
+import logging
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
+
 
 def create_bucket(bucket, region):
 
@@ -49,13 +53,14 @@ def create_bronze_for_table(table, partition_date = None):
         df = pd.read_sql_table(con=conn, table_name=table)
         df.to_parquet(path=f's3://{bucket}/bronze/{table}/{partition_date}/{table}.parquet', engine='pyarrow')
 
-        print(f'{table}.parquet file successfully loaded into s3')
-
+        logger.info(f'{table}.parquet file successfully loaded into S3')
         return True
 
-    except:
-        print(f'{table}.parquet file was not successfully loaded into S3')
-
+    except Exception:
+        logger.error(f'Failed to load {table}.parquet file into S3')
+        logger.error(f'Partition: {partition_date}, Bucket: {bucket}')
+        raise
+                     
     return False
 
 
