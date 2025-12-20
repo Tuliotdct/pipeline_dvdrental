@@ -18,8 +18,8 @@ def dag_pipeline_bronze():
 
     start = EmptyOperator(task_id = 'Start')
 
-    bucket = Variable.get('BUCKET_NAME', default_var=os.getenv('BUCKET_NAME'))
-    region = Variable.get('REGION_NAME', default_var=os.getenv('REGION_NAME'))
+    bucket = Variable.get('BUCKET_NAME', default=os.getenv('BUCKET_NAME'))
+    region = Variable.get('REGION_NAME', default=os.getenv('REGION_NAME'))
 
     @task(task_id = 'create_bucket')
     def create_bucket_once():

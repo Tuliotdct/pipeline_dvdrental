@@ -43,7 +43,7 @@ def create_bronze_for_table(table, partition_date = None):
     # Get one unique table from the database at once
     conn = get_connection()
     
-    bucket = Variable.get('BUCKET_NAME', default_var=os.getenv('BUCKET_NAME'))
+    bucket = Variable.get('BUCKET_NAME', default=os.getenv('BUCKET_NAME'))
 
     # time folder
     if partition_date is None:
