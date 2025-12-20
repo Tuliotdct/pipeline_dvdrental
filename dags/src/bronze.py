@@ -7,6 +7,8 @@ import os
 from dotenv import load_dotenv
 import pyarrow
 import logging
+from airflow.models import Variable
+
 
 load_dotenv()
 
@@ -40,8 +42,9 @@ def create_bronze_for_table(table, partition_date = None):
 
     # Get one unique table from the database at once
     conn = get_connection()
-    bucket = os.getenv('BUCKET_NAME')
-    region = os.getenv('REGION_NAME')
+    
+    bucket = Variable.get('BUCKET_NAME', default_var=os.getenv('BUCKET_NAME'))
+    region = Variable.get('REGION_NAME', default_var=os.getenv('REGION_NAME'))
 
     # time folder
     if partition_date is None:

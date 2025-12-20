@@ -3,13 +3,14 @@ from botocore.exceptions import ClientError
 import json
 import os
 from dotenv import load_dotenv
+from airflow.models import Variable
 
 def get_secret():
 
     load_dotenv()
 
-    secret_name = os.getenv("SECRET_NAME")
-    region_name = os.getenv("REGION_NAME")
+    secret_name = Variable.get("SECRET_NAME", default_var=os.getenv("SECRET_NAME"))
+    region_name = Variable.get("REGION_NAME", default_var=os.getenv("REGION_NAME"))
 
     session = boto3.session.Session()
     client = session.client(
