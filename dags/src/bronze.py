@@ -44,7 +44,6 @@ def create_bronze_for_table(table, partition_date = None):
     conn = get_connection()
     
     bucket = Variable.get('BUCKET_NAME', default_var=os.getenv('BUCKET_NAME'))
-    region = Variable.get('REGION_NAME', default_var=os.getenv('REGION_NAME'))
 
     # time folder
     if partition_date is None:
