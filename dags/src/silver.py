@@ -43,13 +43,28 @@ def create_silver_for_table(table, partition_date = None):
         # This will be triggered only for testing purposes
         partition_date = pendulum.datetime(2025, 11, 30, 0, 0, 0).format('YYYY-MM-DD_HH-mm-ss')
 
-    duckdb.sql(f"""CREATE OR REPLACE SECRET secret (
-        TYPE s3,
-        PROVIDER config,
-        REGION '{region}'
-    );
-    """
-    )
+    # Get AWS credentials from boto3 session (works in MWAA)
+    session = boto3.Session()
+    credentials = session.get_credentials()
+    
+    if credentials:
+        # Use temporary credentials from AWS environment
+        duckdb.sql(f"""CREATE OR REPLACE SECRET secret (
+            TYPE s3,
+            KEY_ID '{credentials.access_key}',
+            SECRET '{credentials.secret_key}',
+            SESSION_TOKEN '{credentials.token}',
+            REGION '{region}'
+        );
+        """)
+    else:
+        # Fallback for local development without credentials
+        duckdb.sql(f"""CREATE OR REPLACE SECRET secret (
+            TYPE s3,
+            PROVIDER config,
+            REGION '{region}'
+        );
+        """)
 
     try:
         duckdb.sql(f"""
