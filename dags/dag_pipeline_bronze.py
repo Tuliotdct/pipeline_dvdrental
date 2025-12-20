@@ -2,6 +2,7 @@ from airflow.sdk import dag, task, TaskGroup
 from airflow.providers.standard.operators.empty import EmptyOperator
 from src.bronze import create_bronze_for_table, get_db_tables, create_bucket
 from src.db_connections import get_connection
+from airflow.models import Variable
 import pendulum
 import os
 
@@ -18,8 +19,8 @@ def dag_pipeline_bronze():
 
     start = EmptyOperator(task_id = 'Start')
 
-    bucket = os.getenv("BUCKET_NAME")
-    region = os.getenv("REGION_NAME")
+    bucket = Variable.get('BUCKET_NAME', default_var=os.getenv('BUCKET_NAME'))
+    region = Variable.get('REGION_NAME', default_var=os.getenv('REGION_NAME'))
 
     @task(task_id = 'create_bucket')
     def create_bucket_once():
