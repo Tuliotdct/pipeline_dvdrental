@@ -1,8 +1,7 @@
-from airflow.sdk import dag, task, TaskGroup
+from airflow.sdk import dag, task, TaskGroup, Variable
 from airflow.providers.standard.operators.empty import EmptyOperator
 from src.bronze import create_bronze_for_table, get_db_tables, create_bucket
 from src.db_connections import get_connection
-from airflow.models import Variable
 import pendulum
 import os
 

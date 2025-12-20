@@ -3,7 +3,7 @@ from botocore.exceptions import ClientError
 import json
 import os
 from dotenv import load_dotenv
-from airflow.models import Variable
+from airflow.sdk import Variable
 
 def get_secret():
 
