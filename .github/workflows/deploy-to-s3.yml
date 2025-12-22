@@ -28,6 +28,10 @@ jobs:
         run: |
           aws s3 sync ./config s3://${{ secrets.BUCKET_AIRFLOW }}/config --delete
 
+      - name: Sync requirements.txt to S3
+        run: |
+          aws s3 cp ./requirements.txt s3://${{ secrets.BUCKET_AIRFLOW }}/requirements.txt
+
       - name: Verify deployment
         run: |
           echo "Deployment completed successfully!"
