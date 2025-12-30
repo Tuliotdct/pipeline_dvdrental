@@ -3,6 +3,7 @@ from airflow.providers.standard.operators.empty import EmptyOperator
 from src.silver import bronze_tables, create_silver_for_table
 import pendulum
 
+
 @dag(
     dag_id = 'dag_pipeline_silver',
     schedule = None,

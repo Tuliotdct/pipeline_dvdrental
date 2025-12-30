@@ -3,6 +3,7 @@ from airflow.providers.standard.operators.empty import EmptyOperator
 from airflow.providers.standard.operators.trigger_dagrun import TriggerDagRunOperator
 import pendulum
 
+
 @dag(
     dag_id = 'dag_pipeline_main',
     schedule = '0 7 * * *',

@@ -7,13 +7,12 @@ import os
 from dotenv import load_dotenv
 import pyarrow
 import logging
-from airflow.sdk import Variable
+from .vars_airflow import get_variable
 
 
 load_dotenv()
 
 logger = logging.getLogger(__name__)
-
 
 def create_bucket(bucket, region):
 
@@ -38,12 +37,12 @@ def get_db_tables(conn):
 
     return db_tables
 
-def create_bronze_for_table(table, partition_date = None):
+def create_bronze_for_table(table, partition_date=None):
 
     # Get one unique table from the database at once
     conn = get_connection()
     
-    bucket = Variable.get('BUCKET_NAME', default=os.getenv('BUCKET_NAME'))
+    bucket = get_variable('BUCKET_NAME', default=os.getenv('BUCKET_NAME'))
 
     # time folder
     if partition_date is None:

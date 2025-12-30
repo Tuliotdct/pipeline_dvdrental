@@ -1,9 +1,10 @@
-from airflow.sdk import dag, task, TaskGroup, Variable
+from airflow.sdk import dag, task, TaskGroup
 from airflow.providers.standard.operators.empty import EmptyOperator
 from src.bronze import create_bronze_for_table, get_db_tables, create_bucket
 from src.db_connections import get_connection
 import pendulum
 import os
+from src.vars_airflow import get_variable
 
 
 @dag(
@@ -18,8 +19,8 @@ def dag_pipeline_bronze():
 
     start = EmptyOperator(task_id = 'Start')
 
-    bucket = Variable.get('BUCKET_NAME', default=os.getenv('BUCKET_NAME'))
-    region = Variable.get('REGION_NAME', default=os.getenv('REGION_NAME'))
+    bucket = get_variable('BUCKET_NAME', default=os.getenv('BUCKET_NAME'))
+    region = get_variable('REGION_NAME', default=os.getenv('REGION_NAME'))
 
     @task(task_id = 'create_bucket')
     def create_bucket_once():
@@ -32,7 +33,7 @@ def dag_pipeline_bronze():
 
     with TaskGroup(group_id = 'bronze_jobs') as bronze_group:
         @task
-        def load_single_table_bronze(table_name, logical_date=None):
+        def load_single_table_bronze(table_name, logical_date = None):
             partition_date = logical_date.in_timezone('Europe/Amsterdam').format('YYYY-MM-DD_HH-mm-ss')
             return create_bronze_for_table(table_name, partition_date=partition_date)
         

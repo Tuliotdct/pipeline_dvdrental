@@ -4,12 +4,12 @@ import pendulum
 import os
 from dotenv import load_dotenv
 import logging
-from airflow.sdk import Variable
+from .vars_airflow import get_variable
+
 
 load_dotenv()
 
 logger = logging.getLogger(__name__)
-
 
 def bronze_tables():
     
@@ -18,7 +18,7 @@ def bronze_tables():
     s3  = boto3.client("s3")
 
     # Try to get from Airflow Variable first, fallback to env var for local development
-    bucket = Variable.get("BUCKET_NAME", default=os.getenv("BUCKET_NAME"))
+    bucket = get_variable("BUCKET_NAME", default=os.getenv("BUCKET_NAME"))
 
     response = s3.list_objects_v2(Bucket = bucket, Prefix = 'bronze/', Delimiter='/')
 
@@ -35,8 +35,8 @@ def bronze_tables():
 def create_silver_for_table(table, partition_date = None):
 
     # Transform data from the bronze layer and send to the Silver Layer
-    bucket = Variable.get("BUCKET_NAME", default=os.getenv("BUCKET_NAME"))
-    region = Variable.get("REGION_NAME", default=os.getenv("REGION_NAME"))
+    bucket = get_variable("BUCKET_NAME", default=os.getenv("BUCKET_NAME"))
+    region = get_variable("REGION_NAME", default=os.getenv("REGION_NAME"))
 
     if partition_date is None:
 
