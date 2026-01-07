@@ -47,14 +47,16 @@ def create_silver_for_table(table, partition_date = None):
     session = boto3.Session()
     credentials = session.get_credentials()
     
-    if credentials:
-        # Use temporary credentials from AWS environment
+    # Check if we have temporary credentials (MWAA) or permanent credentials (local)
+    if credentials and credentials.token:
+        # Use temporary credentials from AWS environment (MWAA with IAM role)
         duckdb.sql(f"""CREATE OR REPLACE SECRET secret (
             TYPE s3,
             KEY_ID '{credentials.access_key}',
             SECRET '{credentials.secret_key}',
             SESSION_TOKEN '{credentials.token}',
-            REGION '{region}'
+            REGION '{region}',
+            ENDPOINT 's3.{region}.amazonaws.com'
         );
         """)
     else:
@@ -62,7 +64,8 @@ def create_silver_for_table(table, partition_date = None):
         duckdb.sql(f"""CREATE OR REPLACE SECRET secret (
             TYPE s3,
             PROVIDER config,
-            REGION '{region}'
+            REGION '{region}',
+            ENDPOINT 's3.{region}.amazonaws.com'
         );
         """)
 
@@ -85,11 +88,3 @@ def create_silver_for_table(table, partition_date = None):
 
     
     return False
-
-def create_silver(partition_date=None):
-    
-    # Get all the tables from the bronze at once 
-    
-    tables = bronze_tables()
-    for table in tables:
-        create_silver_for_table(table=table, partition_date=None)
