@@ -63,12 +63,3 @@ def create_bronze_for_table(table, partition_date=None):
         raise
                      
     return False
-
-
-def create_bronze(partition_date=None):
-
-    # Get all the tables from the database at once
-    conn = get_connection()
-    tables = get_db_tables(conn)
-    for table in tables:
-        create_bronze_for_table(table, partition_date)
