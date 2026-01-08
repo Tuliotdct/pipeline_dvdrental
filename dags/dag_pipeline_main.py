@@ -38,9 +38,21 @@ def dag_pipeline_main():
         failed_states=['failed']
     )
 
+
+    trigger_gold = TriggerDagRunOperator(
+        task_id = 'gold',
+        trigger_dag_id = 'dag_pipeline_gold',
+        logical_date='{{ dag_run.logical_date }}',
+        wait_for_completion = True,
+        deferrable = True,
+        reset_dag_run=True,
+        allowed_states=['success'],
+        failed_states=['failed']
+    )
+
     end = EmptyOperator(task_id = 'End')
 
-    start >> trigger_bronze >> trigger_silver >> end
+    start >> trigger_bronze >> trigger_silver >> trigger_gold >>end
 
 dag_pipeline_main()
 
