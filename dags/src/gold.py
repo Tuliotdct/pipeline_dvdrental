@@ -21,15 +21,18 @@ def silver_tables():
 
     bucket = get_variable("BUCKET_NAME", default=os.getenv("BUCKET_NAME"))
 
-    response = s3.list_objects_v2(Bucket = bucket, Prefix = 'silver/', Delimiter = '/')
-
-    if 'CommonPrefixes' not in response:
-        return []
+    # Use paginator to handle large number of objects
+    paginator = s3.get_paginator('list_objects_v2')
+    page_iterator = paginator.paginate(Bucket=bucket, Prefix='silver/', Delimiter='/')
     
     list_silver_tables = []
-    for obj in response['CommonPrefixes']:
-        filter_silver_tables = obj['Prefix'].split('/')[1]
-        list_silver_tables.append(filter_silver_tables)
+    for page in page_iterator:
+        if 'CommonPrefixes' not in page:
+            continue
+        
+        for obj in page['CommonPrefixes']:
+            filter_silver_tables = obj['Prefix'].split('/')[1]
+            list_silver_tables.append(filter_silver_tables)
 
     
     return list_silver_tables

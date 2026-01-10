@@ -20,15 +20,18 @@ def bronze_tables():
     # Try to get from Airflow Variable first, fallback to env var for local development
     bucket = get_variable("BUCKET_NAME", default=os.getenv("BUCKET_NAME"))
 
-    response = s3.list_objects_v2(Bucket = bucket, Prefix = 'bronze/', Delimiter='/')
-
-    if 'CommonPrefixes' not in response:
-        return []
+    # Use paginator to handle large number of objects
+    paginator = s3.get_paginator('list_objects_v2')
+    page_iterator = paginator.paginate(Bucket=bucket, Prefix='bronze/', Delimiter='/')
 
     list_bronze_tables = []
-    for obj in response['CommonPrefixes']:
-        filter_bronze_tables = obj['Prefix'].split("/")[1]
-        list_bronze_tables.append(filter_bronze_tables)
+    for page in page_iterator:
+        if 'CommonPrefixes' not in page:
+            continue
+        
+        for obj in page['CommonPrefixes']:
+            filter_bronze_tables = obj['Prefix'].split("/")[1]
+            list_bronze_tables.append(filter_bronze_tables)
 
     return list_bronze_tables
 
