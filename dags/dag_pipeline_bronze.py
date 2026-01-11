@@ -2,6 +2,7 @@ from airflow.sdk import dag, task, TaskGroup
 from airflow.providers.standard.operators.empty import EmptyOperator
 from src.bronze import create_bronze_for_table, get_db_tables, create_bucket
 from src.db_connections import get_connection
+from src.data_quality_checks import dq_quality_checks
 import pendulum
 import os
 from src.vars_airflow import get_variable
@@ -37,8 +38,15 @@ def dag_pipeline_bronze():
             partition_date = logical_date.in_timezone('Europe/Amsterdam').format('YYYY-MM-DD_HH-mm-ss')
             return create_bronze_for_table(table_name, partition_date=partition_date)
         
+        @task
+        def dq_single_table(table_name):
+            return dq_quality_checks(table_name)
+        
         for table in tables:
-            load_single_table_bronze.override(task_id=f'{table}')(table_name=table)
+            bronze_task = load_single_table_bronze.override(task_id=f'{table}')(table_name=table)
+            dq_task = dq_single_table.override(task_id=f'dq_{table}')(table_name=table)
+            
+            bronze_task >> dq_task
         
             
     end = EmptyOperator(task_id = 'End')
