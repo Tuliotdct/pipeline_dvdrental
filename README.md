@@ -475,4 +475,3 @@ For questions or support, please open an issue in the repository.
 
 ---
 
-**Built with ❤️ using Apache Airflow and the Medallion Architecture pattern**
